@@ -10,7 +10,17 @@ from page.personal import person
 
 app = Flask(__name__)
 app.register_blueprint(person, url_prefix='/personal')
- 
+
+
+def func():
+    try:
+        x = 5 / 0
+        print(x)
+    except:
+        app.logger.error("Catch an exception in func.", exc_info=True)
+        abort(500)
+
+
 @app.route('/error')
 def error():
     return render_template('404.html')
@@ -21,8 +31,9 @@ def hello_world():
     # app.logger.warning("Warning msg")
     # app.logger.error("Error msg----1")
     try:
-        x = 5 / 0
+        x = 5 / 1
         print(x)
+        func()
     except:
         app.logger.error("Catch an exception.", exc_info=True)
         abort(500)
