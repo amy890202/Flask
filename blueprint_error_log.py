@@ -1,16 +1,20 @@
-from flask import Flask, render_template,redirect
+from flask import Flask, render_template,redirect,abort
 import logging
 from logging.handlers import TimedRotatingFileHandler
 from logging.handlers import SMTPHandler
 
 from flask.helpers import url_for
- 
-#from views.simple_page import simple_page
- 
+
+#from simple_page import simple_page
+from page.personal import person
+
 app = Flask(__name__)
-#app.register_blueprint(simple_page, url_prefix="/simple_page")
+app.register_blueprint(person, url_prefix='/personal')
  
- 
+@app.route('/error')
+def error():
+    return render_template('404.html')
+
 @app.route('/')
 def hello_world():
     # app.logger.info("Info message")
@@ -21,7 +25,7 @@ def hello_world():
         print(x)
     except:
         app.logger.error("Catch an exception.", exc_info=True)
-        return redirect(500)
+        abort(500)
     return 'Hello, World!'
  
 @app.errorhandler(404)
