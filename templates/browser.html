@@ -1,0 +1,9 @@
+<!DOCTYPE html>
+<title>File Browser</title>
+<h1>File Browser</h1>
+
+<hr>
+
+<p>URL: {{ file_url }}</p>
+<a href={{ file_url }} download >file
+<a href="{{ url_for('reportcase.open_file', filename=photo)}} ">open</a><br>
