@@ -1,0 +1,175 @@
+# -*- coding: utf-8 -*-
+import os
+from typing import Any
+import uuid
+
+from flask import Flask, render_template, redirect, url_for, request
+from flask_uploads import ALL, AllExcept, UploadSet, configure_uploads, IMAGES, patch_request_class
+from flask_wtf import FlaskForm
+from flask_wtf.file import FileField, FileRequired, FileAllowed
+from wtforms import SubmitField
+from werkzeug.utils import secure_filename
+from flask import send_from_directory
+
+basedir = os.path.abspath(os.path.dirname(__file__))
+
+app = Flask(__name__)
+app.config['SECRET_KEY'] = 'I have a dream'
+
+import os
+
+
+
+foldername = 'upload'#caseno,'-',handleorder,'-',reviseno        or temp
+
+# import os
+# if not os.path.exists(directory):
+#     os.makedirs(directory)
+
+upload_path = os.path.join(basedir, foldername)
+if not os.path.isdir(upload_path):
+    os.mkdir(upload_path)
+
+
+
+app.config['UPLOADED_FILES_DEST'] = upload_path # you'll need to create a folder named uploads
+#ALLOWED_EXTENSIONS = set(['pdf', 'png', 'jpg', 'jpeg', 'gif'])
+
+
+photos = UploadSet(extensions= AllExcept(['exe','wmf']))
+#photos = UploadSet('photos',IMAGES)
+#photos = UploadSet('files')
+
+
+import shutil
+def cleartempfolder():
+    print("delete file:",os.listdir( upload_path))
+    if os.path.isdir( upload_path):
+        shutil.rmtree( upload_path)
+    if os.path.isdir( upload_path):
+        print("not sucess",os.listdir( upload_path))
+    return 0
+import atexit
+@atexit.register
+def goodbye():
+    cleartempfolder()
+    print('Goodbye, we can not use arguments')
+
+# UPLOAD_FOLDER = os.path.join(basedir, 'uploads')
+# #ALLOWED_EXTENSIONS = set(['pdf', 'png', 'jpg', 'jpeg', 'gif'])
+# app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+# app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB
+
+# def allowed_file(filename):
+#     return '.' in filename and \
+#            filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
+
+
+
+
+# 同時初始化
+configure_uploads(app, [photos])
+#photos = UploadSet('photos', IMAGES)
+#configure_uploads(app, photos)
+patch_request_class(app)  # set maximum file size, default is 16MB
+
+
+class UploadForm(FlaskForm):
+    photo = FileField(validators=[FileAllowed(photos, 'file Only!'), FileRequired('Choose a file!')])
+    submit = SubmitField('Upload')
+
+
+@app.route('/upload_file', methods=['GET', 'POST'])
+def upload_file():
+    success = False
+    form = UploadForm()
+    if form.validate_on_submit():
+        for f in request.files.getlist('photo'):
+            filename = uuid.uuid4().hex
+            print("f:",filename)
+            photos.save(f, name=filename + '.')
+            success = True     
+    else:
+        success = False
+    files_list = os.listdir(app.config['UPLOADED_FILES_DEST'])
+    return render_template('reportcase.html', form=form, success=success,files_list=files_list)
+
+
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(app.config['UPLOADED_FOLDER'],
+                               filename)
+@app.route('/manage')
+def manage_file():
+    files_list = os.listdir(app.config['UPLOADED_FILES_DEST'])
+    return render_template('manage.html', files_list=files_list)
+@report.route('/download/<string:filename>', methods=['GET'])
+def download(filename):
+  if request.method == "GET":
+    if os.path.isfile(os.path.join(app.config['UPLOADED_FILES_DEST'],filename )):
+      return send_from_directory(app.config['UPLOADED_FILES_DEST'], filename, as_attachment=True)
+    pass
+
+@app.route('/open/<filename>')
+def open_file(filename):
+    file_url = photos.url(filename)
+    return render_template('browser.html', file_url=file_url)
+
+
+@app.route('/delete/<filename>')
+def delete_file(filename):
+    file_path = photos.path(filename)
+    os.remove(file_path)
+    return redirect(url_for('manage_file'))
+
+
+# @handle.route('/uploadfile',methods=['GET', 'POST'])
+# #@login_required
+# def upload_file():
+# 	success = False
+# 	form = UploadForm()
+# 	if form.validate_on_submit():
+# 		for f in request.files.getlist('photo'):
+# 			#filename = uuid.uuid4().hex
+# 			#print("f:",f.filename)
+
+# 			photos.save(f,name =  secure_filename(f.filename))#secure_filename(''.join(lazy_pinyin(file.filename)))
+# 			success = True     
+# 	else:
+# 		success = False
+# 	files_list = os.listdir(dirname)
+# 	return render_template('uploadfile.html', form=form, success=success,files_list=files_list)
+# report.route('/download/<string:filename>', methods=['GET'])
+# def download(filename):
+#   if request.method == "GET":
+#     if os.path.isfile(os.path.join(dirname,filename )):
+#       return send_from_directory(dirname, filename, as_attachment=True)
+#     pass
+
+# @report.route('/delete/<filename>')
+# def delete_file(filename):
+#     file_path = photos.path(filename)
+#     os.remove(file_path)
+#     return redirect(url_for('reportcase.upload_file'))
+
+# import shutil
+# def movefilelocation(caseno, handleorder ,reviseno):
+# 	filelist = os.listdir(dirname)
+# 	newfoldername = str(caseno) + '_' + str(handleorder) + '_'+str(reviseno)
+# 	upload_path = os.path.join(basedir,'upload_file', newfoldername)
+# 	if not os.path.exists(upload_path):
+# 		os.makedirs(upload_path)
+# 	if os.path.isdir(dirname) and filelist:
+# 		for i in filelist:
+# 			oldpath = os.path.join(dirname, i)
+# 			newfilename = str(caseno) + str(handleorder) +str(reviseno) + i
+# 			#print('old:',oldpath)
+# 			filepath = os.path.join(upload_path,i)
+# 			#print('new:',filepath)
+# 			if not os.path.exists(filepath):
+# 				shutil.move(oldpath, filepath)
+# 	print('error')
+# 	return 0
+
+if __name__ == '__main__':
+    app.run(debug=True)
