@@ -1,0 +1,23 @@
+<form method="POST" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+    {{ form.photo(multiple="multiple")}}
+    {% for error in form.photo.errors %}
+        <span style="color: red;">{{ error }}</span>
+    {% endfor %}
+    {{ form.submit }}
+</form>
+
+{% if success %}
+<br>
+<p>Upload Success!</p>
+{% endif %}
+
+
+
+{%if files_list%}
+  {% for photo in files_list %}
+      - {{ photo }}
+      <a href="{{ url_for('reportcase.download', filename=photo) }}">open</a>
+      <a href="{{ url_for('reportcase.delete_file', filename=photo) }}">del</a><br>
+  {% endfor %}</td>
+{% endif %}
