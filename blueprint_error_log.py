@@ -59,18 +59,5 @@ if __name__ == '__main__':
     app.logger.addHandler(handler)
     handler.setFormatter(formatter)
     app.run(debug=True)
-    # # Email Handler
-    # mail_handler = SMTPHandler(
-    #     mailhost='10.64.1.85',
-    #     fromaddr='flask-admin@trendmicro.com',
-    #     toaddrs=['wenjun_yang@trendmicro.com'],
-    #     subject='Flask Application Error'
-    # )
-    # mail_handler.setLevel(logging.ERROR)
-    # mail_handler.setFormatter(logging.Formatter(
-    #     "[%(asctime)s][%(module)s:%(lineno)d][%(levelname)s][%(thread)d] - %(message)s"
-    # ))
-    # app.logger.addHandler(mail_handler)
- 
-    #app.run()
+    
  
