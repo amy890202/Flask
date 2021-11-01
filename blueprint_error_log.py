@@ -61,9 +61,9 @@ if __name__ == '__main__':
     app.run(debug=True)
     # # Email Handler
     # mail_handler = SMTPHandler(
-    #     mailhost='10.64.1.85',
-    #     fromaddr='flask-admin@trendmicro.com',
-    #     toaddrs=['wenjun_yang@trendmicro.com'],
+    #     mailhost='0.0.0.0',
+    #     fromaddr='...@....com',
+    #     toaddrs=['....@....com'],
     #     subject='Flask Application Error'
     # )
     # mail_handler.setLevel(logging.ERROR)
